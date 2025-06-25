@@ -70,3 +70,4 @@ class GroupStatsFeatureGenerator(BaseEstimator, TransformerMixin):
         # 변환 작업이 끝난, 새로운 피처들이 추가된 최종 데이터프레임을 반드시 반환해야 함. 
         # 이 결과물이 파이프라인의 다음 '부품'으로 전달됨.
         
+        
