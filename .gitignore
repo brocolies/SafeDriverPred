@@ -1,0 +1,14 @@
+# 데이터 파일 무시
+data/train.csv
+data/test.csv
+
+# Jupyter 노트북 체크포인트 무시
+.ipynb_checkpoints/
+
+# 파이썬 캐시 무시
+__pycache__/
+*.pyc
+
+# 환경 파일 무시
+.envdata/train.csv
+data/test.csv
