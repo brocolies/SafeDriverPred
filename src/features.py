@@ -10,31 +10,11 @@ class InteractionFeatureGenerator(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X):
+        # 입력받은 데이터프레임 X를 복사해서 원본을 보호
         X_new = X.copy()
         
         # 피처 엔지니어링
-        
-        return X_new
 
-    def transform(self, X):
-        X_new = X.copy()
-        for col in self.categorical_features:
-            # fit에서 만든 해당 피처의 인코딩 맵을 가져옴
-            encoding_map = self.encoding_maps[col]
-            
-            # 매핑을 통해 새로운 피처들을 생성
-            encoded_features = X_new[col].map(encoding_map.to_dict('index'))
-            
-            # 새로운 피처들의 이름 지정 (예: crop_type_target_enc_Urea)
-            encoded_df = pd.DataFrame(encoded_features.tolist(), index=X_new.index)
-            encoded_df.columns = [f'{col}_target_enc_{c}' for c in encoding_map.columns]
-            
-            # 기존 데이터프레임과 합치기
-            X_new = pd.concat([X_new, encoded_df], axis=1)
-        
-        # 원본 범주형 컬럼은 이제 필요 없으니 삭제
-        X_new = X_new.drop(columns=self.categorical_features)
-        
         return X_new
 
 class GroupStatsFeatureGenerator(BaseEstimator, TransformerMixin):
