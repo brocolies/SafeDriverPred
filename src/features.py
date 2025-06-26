@@ -1,5 +1,7 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
+from itertools import combinations
+
 
 class InteractionFeatureGenerator(BaseEstimator, TransformerMixin):
     def __init__(self):
@@ -71,3 +73,42 @@ class GroupStatsFeatureGenerator(BaseEstimator, TransformerMixin):
         # 이 결과물이 파이프라인의 다음 '부품'으로 전달됨.
         
         
+def generate_features(df, top_features):
+    new_features = []
+    for op in ['*', '/', '+', '-']:
+        for f1, f2 in combinations(top_features, 2):
+            new_feat = f"{f1}_{op}_{f2}"
+            df[new_feat] = apply_op(df[f1], df[f2], op)
+            new_features.append(new_feat)
+    return new_features
+
+
+def quick_cv_test(train, feature_name, baseline_score=0.27440):
+    train_test = train.copy()
+    
+    # 타겟 분리
+    X = train_test.drop(columns='target')
+    y = train_test['target']
+    
+    # 모델 및 CV 설정
+    model = LGBMClassifier(random_state=42)
+    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+    
+    # CV 실행
+    cv_scores = []
+    for train_idx, val_idx in skf.split(X, y):
+        X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
+        y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
+        
+        model.fit(X_train, y_train)
+        y_pred = model.predict_proba(X_val)[:, 1]
+        score = gini_normalized(y_val.values, y_pred)
+        cv_scores.append(score)
+    
+    mean_score = np.mean(cv_scores)
+    
+    # 결과 출력
+    improvement = mean_score - baseline_score
+    print(f'{feature_name}: {mean_score:.5f} ({improvement:+.5f})')
+    
+    return mean_score
