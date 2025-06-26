@@ -1,7 +1,10 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 import pandas as pd
 from itertools import combinations
-
+from lightgbm import LGBMClassifier
+from sklearn.model_selection import StratifiedKFold
+from sklearn.metrics import roc_auc_score
+import numpy as np
 
 class InteractionFeatureGenerator(BaseEstimator, TransformerMixin):
     def __init__(self):
@@ -18,6 +21,9 @@ class InteractionFeatureGenerator(BaseEstimator, TransformerMixin):
         # 피처 엔지니어링
 
         return X_new
+
+class CategoricalEncoder(BaseEstimator, TransformerMixin):
+    
 
 class GroupStatsFeatureGenerator(BaseEstimator, TransformerMixin):
     # 이제 여러 개의 그룹과 여러 개의 수치형 컬럼을 처리하도록 리스트를 받는다
@@ -72,16 +78,8 @@ class GroupStatsFeatureGenerator(BaseEstimator, TransformerMixin):
         # 변환 작업이 끝난, 새로운 피처들이 추가된 최종 데이터프레임을 반드시 반환해야 함. 
         # 이 결과물이 파이프라인의 다음 '부품'으로 전달됨.
         
-        
-def generate_features(df, top_features):
-    new_features = []
-    for op in ['*', '/', '+', '-']:
-        for f1, f2 in combinations(top_features, 2):
-            new_feat = f"{f1}_{op}_{f2}"
-            df[new_feat] = apply_op(df[f1], df[f2], op)
-            new_features.append(new_feat)
-    return new_features
-
+def gini_normalized(y_true, y_pred):
+    return 2 * roc_auc_score(y_true, y_pred) - 1
 
 def quick_cv_test(train, feature_name, baseline_score=0.27440):
     train_test = train.copy()
@@ -112,3 +110,6 @@ def quick_cv_test(train, feature_name, baseline_score=0.27440):
     print(f'{feature_name}: {mean_score:.5f} ({improvement:+.5f})')
     
     return mean_score
+
+
+
