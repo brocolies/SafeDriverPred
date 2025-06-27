@@ -78,38 +78,3 @@ class GroupStatsFeatureGenerator(BaseEstimator, TransformerMixin):
         # 변환 작업이 끝난, 새로운 피처들이 추가된 최종 데이터프레임을 반드시 반환해야 함. 
         # 이 결과물이 파이프라인의 다음 '부품'으로 전달됨.
         
-def gini_normalized(y_true, y_pred):
-    return 2 * roc_auc_score(y_true, y_pred) - 1
-
-def quick_cv_test(train, feature_name, baseline_score=0.27440):
-    train_test = train.copy()
-    
-    # 타겟 분리
-    X = train_test.drop(columns='target')
-    y = train_test['target']
-    
-    # 모델 및 CV 설정
-    model = LGBMClassifier(random_state=42)
-    skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    
-    # CV 실행
-    cv_scores = []
-    for train_idx, val_idx in skf.split(X, y):
-        X_train, X_val = X.iloc[train_idx], X.iloc[val_idx]
-        y_train, y_val = y.iloc[train_idx], y.iloc[val_idx]
-        
-        model.fit(X_train, y_train)
-        y_pred = model.predict_proba(X_val)[:, 1]
-        score = gini_normalized(y_val.values, y_pred)
-        cv_scores.append(score)
-    
-    mean_score = np.mean(cv_scores)
-    
-    # 결과 출력
-    improvement = mean_score - baseline_score
-    print(f'{feature_name}: {mean_score:.5f} ({improvement:+.5f})')
-    
-    return mean_score
-
-
-

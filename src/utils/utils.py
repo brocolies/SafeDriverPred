@@ -5,17 +5,12 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
-# --- (다른 유틸리티 함수들: plot_multiple_axes, resumetable, col_value_counts 등) ---
 def get_data_path(file_name):
-    """
-    현재 스크립트 파일의 위치를 기준으로 'data/' 폴더 내의 파일 경로를 반환합니다.
-    """
-    current_script_dir = Path(os.path.abspath(__file__)).parent
-    project_root = current_script_dir.parent # 'src'의 부모 폴더 (즉, 프로젝트 루트)
-    data_folder = project_root / 'data'
+    current_script_dir = Path(os.path.abspath(__file__)).parent  # src/utils/
+    project_root = current_script_dir.parent.parent              # SafeDriverPred/
+    data_folder = project_root / 'data'                          # SafeDriverPred/data/
+    
     file_path = data_folder / file_name
-
     if not file_path.exists():
         raise FileNotFoundError(f"데이터 파일을 찾을 수 없습니다: {file_path}")
     return str(file_path)
